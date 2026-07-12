@@ -1,0 +1,136 @@
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background: #000;
+  overflow: hidden;
+}
+
+/* Blurred movie-poster background */
+.bg {
+  position: absolute;
+  inset: 0;
+  background:
+    url('https://assets.nflxext.com/ffe/siteui/vlv3/f841d4b6-c11a-4d9d-b9f0-6d582e986d8f/web/IN-en-20250106-TRIFECTA-perspective_7f0b2f83-7e74-4761-9a72-89fc42a7dcd0_large.jpg')
+    center / cover no-repeat;
+  filter: blur(4px) brightness(0.35);
+  transform: scale(1.05);
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0,0,0,0.6) 0%,
+    rgba(0,0,0,0.2) 40%,
+    rgba(0,0,0,0.2) 60%,
+    rgba(0,0,0,0.8) 100%
+  );
+}
+
+/* TP Logo — Netflix style */
+.logo {
+  position: absolute;
+  top: 1.8rem;
+  left: 2.5rem;
+  font-size: 3rem;
+  font-weight: 900;
+  color: #e50914;
+  letter-spacing: -2px;
+  font-style: italic;
+  text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
+  z-index: 10;
+}
+
+.center {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2.5rem;
+}
+
+.heading {
+  font-size: 2rem;
+  font-weight: 400;
+  color: #fff;
+  letter-spacing: 0.5px;
+}
+
+.profiles {
+  display: flex;
+  gap: 2.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.profile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.9rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.2s;
+}
+
+.profile:hover {
+  transform: scale(1.08);
+}
+
+.profile:hover .avatar {
+  border: 3px solid #fff;
+}
+
+.profile:hover .name {
+  color: #fff;
+}
+
+.avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #e50914 0%, #b20710 50%, #7a0008 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid transparent;
+  transition: border 0.2s;
+  box-shadow: 0 4px 24px rgba(229,9,20,0.4);
+}
+
+.avatarInitial {
+  font-size: 3.5rem;
+  font-weight: 700;
+  color: #fff;
+  font-style: italic;
+  text-shadow: 1px 1px 4px rgba(0,0,0,0.4);
+}
+
+.name {
+  font-size: 1rem;
+  color: #aaa;
+  transition: color 0.2s;
+  letter-spacing: 0.3px;
+}
+
+/* Loading spinner */
+.spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid rgba(255,255,255,0.2);
+  border-top-color: #e50914;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

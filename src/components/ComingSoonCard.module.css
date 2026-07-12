@@ -1,0 +1,40 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  border-radius: 12px;
+  overflow: hidden;
+  opacity: 0.5;
+  border: 1px dashed rgba(255,255,255,0.1);
+}
+
+.thumb {
+  width: 100%;
+  aspect-ratio: 2/3;
+  background: linear-gradient(135deg, #0d0d1a, #111122);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon {
+  font-size: 2.5rem;
+  filter: grayscale(1);
+  opacity: 0.3;
+}
+
+.info {
+  padding: 0.6rem 0.7rem 0.75rem;
+}
+
+.title {
+  font-size: 0.82rem;
+  color: var(--text2);
+  font-weight: 600;
+}
+
+.genre {
+  font-size: 0.72rem;
+  color: var(--muted);
+  text-transform: capitalize;
+  margin-top: 3px;
+}

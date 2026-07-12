@@ -1,0 +1,139 @@
+.splash {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  gap: 1.4rem;
+  transition: opacity 1s ease;
+}
+
+.fadeOut {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ── Logo wrapper ── */
+.logoWrap {
+  position: relative;
+  width: 220px;
+  height: 130px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.letter {
+  position: absolute;
+  font-size: 7rem;
+  font-weight: 900;
+  font-style: italic;
+  color: #e50914;
+  line-height: 1;
+  text-shadow:
+    0 0 40px rgba(229, 9, 20, 0.9),
+    0 0 80px rgba(229, 9, 20, 0.4);
+  will-change: transform, opacity;
+}
+
+/* ── T ─────────────────────────────────── */
+/* default: off top-right */
+.letterT {
+  left: 12px;
+  opacity: 0;
+  transform: translate(280px, -200px) scale(0.3);
+  transition: none;
+}
+
+/* enter: slides in from top-right over 1s */
+.letterT.tLanded {
+  opacity: 1;
+  transform: translate(0, 0) scale(1);
+  transition: transform 1s cubic-bezier(0.22, 1, 0.36, 1),
+              opacity 0.4s ease;
+}
+
+/* exit: flies out to top-left */
+.letterT.tExit {
+  opacity: 0 !important;
+  transform: translate(-280px, -200px) scale(0.3) !important;
+  transition: transform 0.8s cubic-bezier(0.55, 0, 0.78, 0),
+              opacity 0.5s ease !important;
+}
+
+/* ── P ─────────────────────────────────── */
+/* default: off bottom-left */
+.letterP {
+  right: 12px;
+  opacity: 0;
+  transform: translate(-280px, 200px) scale(0.3);
+  transition: none;
+}
+
+/* enter: slides in from bottom-left over 1s */
+.letterP.pLanded {
+  opacity: 1;
+  transform: translate(0, 0) scale(1);
+  transition: transform 1s cubic-bezier(0.22, 1, 0.36, 1),
+              opacity 0.4s ease;
+}
+
+/* exit: flies out to bottom-right */
+.letterP.pExit {
+  opacity: 0 !important;
+  transform: translate(280px, 200px) scale(0.3) !important;
+  transition: transform 0.8s cubic-bezier(0.55, 0, 0.78, 0),
+              opacity 0.5s ease !important;
+}
+
+/* ── Names ─────────────────────────────── */
+.fullName {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 1.1rem;
+  letter-spacing: 1px;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.nameVisible {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+}
+
+.thilaga { color: #e50914; font-weight: 700; font-style: italic; }
+.praveen { color: #e50914; font-weight: 700; font-style: italic; }
+
+.friend {
+  font-size: 1.2rem;
+  animation: pulse 1.2s ease infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.3); }
+}
+
+/* ── Brand name ────────────────────────── */
+.brandName {
+  font-size: 2.2rem;
+  font-weight: 900;
+  font-style: italic;
+  color: #fff;
+  letter-spacing: 8px;
+  text-transform: uppercase;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.6s ease 0.3s, transform 0.6s ease 0.3s;
+  text-shadow: 0 0 30px rgba(229, 9, 20, 0.5);
+}
+
+.brandName.nameVisible {
+  opacity: 1;
+  transform: translateY(0);
+}
