@@ -1,130 +1,204 @@
+/* ── Full-screen overlay — fades in like splash ── */
 .overlay {
   position: fixed;
   inset: 0;
   z-index: 200;
-  background: rgba(0,0,0,0.75);
-  backdrop-filter: blur(12px);
+  background: rgba(0, 0, 0, 0);
   display: flex;
   align-items: center;
   justify-content: center;
-  animation: fadeIn 0.2s ease;
+  transition: background 0.5s ease;
+  pointer-events: none;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+.overlayIn {
+  background: rgba(0, 0, 0, 0.92);
+  pointer-events: all;
 }
 
-.modal {
-  background: rgba(10,10,20,0.96);
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 20px;
-  padding: 2rem;
-  width: min(480px, calc(100vw - 2rem));
+.overlayOut {
+  background: rgba(0, 0, 0, 0) !important;
+  pointer-events: none;
+  transition: background 0.4s ease;
+}
+
+/* ── Inner — no card border, just content centered ── */
+.inner {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
-  box-shadow: 0 30px 80px rgba(0,0,0,0.8);
-  animation: slideUp 0.25s ease;
-}
-
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-.header {
-  display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 1.6rem;
+  width: min(480px, calc(100vw - 2rem));
+  text-align: center;
 }
 
-.headerIcon { font-size: 2.2rem; }
+/* ── Logo mark — drops in from top like splash letters ── */
+.logoMark {
+  font-size: 3.6rem;
+  opacity: 0;
+  transform: translateY(-60px) scale(0.4);
+  transition: none;
+  filter: drop-shadow(0 0 24px rgba(229, 9, 20, 0.7));
+}
 
-.title {
-  font-size: 1.15rem;
-  font-weight: 800;
+.logoIn {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1),
+              opacity 0.5s ease;
+}
+
+/* ── Title block — rises up like brandName in splash ── */
+.titleBlock {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.titleIn {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.headline {
+  font-size: 1.5rem;
+  font-weight: 900;
+  font-style: italic;
   color: #fff;
-  margin: 0 0 0.2rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin: 0 0 0.35rem;
+  text-shadow: 0 0 30px rgba(229, 9, 20, 0.45);
 }
 
-.subtitle {
+.sub {
   font-size: 0.8rem;
-  color: rgba(255,255,255,0.4);
+  color: rgba(255, 255, 255, 0.38);
   margin: 0;
+  letter-spacing: 0.5px;
 }
 
-.options {
+/* ── Cards row ── */
+.cards {
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
-}
-
-.option {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 1rem 1.1rem;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 12px;
-  cursor: pointer;
-  text-align: left;
-  transition: background 0.18s, border-color 0.18s, transform 0.15s;
-  font-family: inherit;
-  color: inherit;
   width: 100%;
 }
 
-.optionHovered {
-  background: rgba(255,107,53,0.1);
-  border-color: rgba(255,107,53,0.4);
-  transform: translateX(3px);
+/* ── Each card — slides up with stagger ── */
+.card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.2rem;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.04);
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  color: inherit;
+  width: 100%;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.5s ease var(--card-delay, 0ms),
+              transform 0.5s cubic-bezier(0.22, 1, 0.36, 1) var(--card-delay, 0ms),
+              background 0.2s ease,
+              border-color 0.2s ease,
+              box-shadow 0.2s ease;
+  position: relative;
+  overflow: hidden;
 }
 
-.optIcon { font-size: 1.8rem; flex-shrink: 0; }
+.card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--card-color, #ff6b35);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
 
-.optBody {
+.card:hover::before { opacity: 0.06; }
+
+.cardIn {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.card:hover {
+  border-color: var(--card-color, rgba(255,107,53,0.4));
+  box-shadow: 0 0 0 1px var(--card-color, rgba(255,107,53,0.15)),
+              0 8px 32px rgba(0,0,0,0.4);
+  transform: translateY(-2px);
+}
+
+.cardPicked {
+  border-color: var(--card-color, #ff6b35) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  transform: scale(0.97) !important;
+  opacity: 0.6 !important;
+  transition: all 0.3s ease !important;
+}
+
+.cardIcon {
+  font-size: 2rem;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.cardBody {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.2rem;
   flex: 1;
+  position: relative;
+  z-index: 1;
 }
 
-.optTitle {
-  font-size: 0.95rem;
-  font-weight: 700;
+.cardTitle {
+  font-size: 1rem;
+  font-weight: 800;
   color: #fff;
+  letter-spacing: 0.3px;
 }
 
-.optDesc {
-  font-size: 0.78rem;
-  color: rgba(255,255,255,0.45);
+.cardDesc {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.4);
   line-height: 1.4;
 }
 
-.arrow {
-  font-size: 1.1rem;
-  color: rgba(255,255,255,0.25);
-  transition: color 0.18s, transform 0.18s;
+.cardArrow {
+  font-size: 0.7rem;
+  color: var(--card-color, rgba(255,255,255,0.2));
+  opacity: 0.4;
+  transition: opacity 0.2s, transform 0.2s;
+  position: relative;
+  z-index: 1;
 }
 
-.option:hover .arrow {
-  color: #ff6b35;
+.card:hover .cardArrow {
+  opacity: 1;
   transform: translateX(3px);
 }
 
-.cancel {
-  align-self: center;
+/* ── Skip link — subtle, like the splash fade ── */
+.skip {
   background: none;
   border: none;
-  color: rgba(255,255,255,0.3);
-  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.22);
+  font-size: 0.78rem;
   cursor: pointer;
-  padding: 0.4rem 1rem;
-  border-radius: 6px;
-  transition: color 0.15s;
   font-family: inherit;
+  padding: 0.3rem 0.8rem;
+  border-radius: 6px;
+  letter-spacing: 0.3px;
+  transition: color 0.2s;
 }
 
-.cancel:hover { color: rgba(255,255,255,0.7); }
+.skip:hover {
+  color: rgba(255, 255, 255, 0.55);
+}

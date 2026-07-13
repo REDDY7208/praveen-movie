@@ -6,16 +6,18 @@ import AiChat from '@/components/AiChat'
 import { notFound } from 'next/navigation'
 import styles from './watch.module.css'
 
+export const dynamic = 'force-dynamic'
+
 export default async function WatchPage({ params }: { params: { id: string } }) {
   const movie = await getMovieById(params.id)
   if (!movie) notFound()
 
-  const related = await listMovies(movie.language, movie.genre)
-  const others = related.filter((m) => m.id !== movie.id).slice(0, 10)
+  // Fetch all movies of the same language (no genre filter — show everything)
+  const related = await listMovies(movie.language)
+  const others = related.filter((m) => m.id !== movie.id).slice(0, 5)
 
   return (
     <div className={styles.page}>
-      {/* Cinematic blurred backdrop from poster */}
       {movie.thumbnail && (
         <div
           className={styles.backdrop}
@@ -47,32 +49,46 @@ export default async function WatchPage({ params }: { params: { id: string } }) 
           </div>
         </div>
 
-        {/* Sidebar — related */}
+        {/* Sidebar — Next Up */}
         <aside className={styles.sidebar}>
           <div className={styles.sidebarHeader}>
-            <div className={styles.sidebarAccent} />
-            <h3 className={styles.sidebarTitle}>More like this</h3>
+            <h3 className={styles.sidebarTitle}>
+              Next Up
+              <svg viewBox="0 0 24 24" fill="currentColor" width="13" height="13" style={{marginLeft:'4px', color:'#ff6b35'}}>
+                <polygon points="6,3 20,12 6,21"/>
+              </svg>
+            </h3>
           </div>
 
           <div className={styles.sidebarList}>
             {others.length === 0 && (
-              <p className={styles.noRelated}>No related movies yet.</p>
+              <p className={styles.noRelated}>No other movies yet.</p>
             )}
             {others.map((m) => (
-              <Link key={m.id} href={`/watch/${m.id}`} className={styles.sideCard}>
-                <div className={styles.sideThumb}>
-                  {m.thumbnail
-                    ? <img src={m.thumbnail} alt={m.title} loading="lazy" />
-                    : <div className={styles.sideNoThumb}>🎬</div>
-                  }
-                </div>
+              <Link
+                key={m.id}
+                href={`/watch/${m.id}`}
+                className={styles.sideCard}
+                style={m.thumbnail ? { backgroundImage: `url(${m.thumbnail})` } : undefined}
+              >
+                {/* Dark overlay */}
+                <div className={styles.sideCardOverlay} />
+
+                {/* Info */}
                 <div className={styles.sideInfo}>
                   <p className={styles.sideTitle}>{m.title}</p>
-                  <p className={styles.sideMeta}>
-                    {[m.language !== 'unknown' ? m.language : '', m.genre !== 'unknown' ? m.genre : '']
-                      .filter(Boolean).join(' · ')}
+                  <p className={styles.sideSub}>
+                    {[m.genre !== 'unknown' ? m.genre : '', m.language !== 'unknown' ? m.language : '']
+                      .filter(Boolean).map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' • ')}
                   </p>
                 </div>
+
+                {/* Play button */}
+                <button className={styles.sidePlay} tabIndex={-1} aria-hidden>
+                  <svg viewBox="0 0 24 24" fill="currentColor" width="13" height="13">
+                    <polygon points="6,3 20,12 6,21"/>
+                  </svg>
+                </button>
               </Link>
             ))}
           </div>
