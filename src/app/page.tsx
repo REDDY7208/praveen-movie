@@ -299,7 +299,7 @@ export default function Home() {
                       </div>
                       {baseFiltered.length > 0 ? (
                         <div className={styles.row}>
-                          {baseFiltered.slice(0, 12).map((m) => (
+                          {baseFiltered.slice(0, 24).map((m) => (
                             <div key={m.id} className={styles.rowItem}>
                               <VideoCard video={toCard(m)} />
                             </div>
@@ -330,9 +330,26 @@ export default function Home() {
                   </>
                 )}
 
-                {/* ── All: one "Latest" row per language that has movies ── */}
+                {/* ── All: latest movies across all languages ── */}
                 {!lang && (
                   <>
+                    {allMovies.length > 0 && (
+                      <section className={styles.section}>
+                        <div className={styles.sectionHeader}>
+                          <div className={styles.sectionAccent} />
+                          <h2 className={styles.sectionTitle}>Latest</h2>
+                        </div>
+                        <div className={styles.row}>
+                          {allMovies.slice(0, 24).map((m) => (
+                            <div key={m.id} className={styles.rowItem}>
+                              <VideoCard video={toCard(m)} />
+                            </div>
+                          ))}
+                        </div>
+                      </section>
+                    )}
+
+                    {/* One row per language below */}
                     {LANGUAGES
                       .map((l) => ({ l, movies: allMovies.filter((m) => m.language === l) }))
                       .filter(({ movies }) => movies.length > 0)
@@ -341,7 +358,7 @@ export default function Home() {
                           <div className={styles.sectionHeader}>
                             <div className={styles.sectionAccent} />
                             <h2 className={styles.sectionTitle}>
-                              Latest {l.charAt(0).toUpperCase() + l.slice(1)}
+                              {l.charAt(0).toUpperCase() + l.slice(1)}
                               <span className={styles.langBadge}>{l.charAt(0).toUpperCase() + l.slice(1)}</span>
                             </h2>
                           </div>
