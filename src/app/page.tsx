@@ -6,9 +6,11 @@ import VideoCard from '@/components/VideoCard'
 import ComingSoonCard from '@/components/ComingSoonCard'
 import AiChat from '@/components/AiChat'
 import SplashScreen from '@/components/SplashScreen'
-import { GENRES } from '@/lib/s3'
+import { GENRES, LANGUAGES } from '@/lib/s3'
 import type { MovieItem } from '@/lib/s3'
 import styles from './page.module.css'
+
+const HERO_INTERVAL = 30_000 // 30 seconds
 
 export default function Home() {
   const [allMovies, setAllMovies] = useState<MovieItem[]>([])
@@ -20,7 +22,10 @@ export default function Home() {
   const [aiSearching, setAiSearching] = useState(false)
   const [trailerMuted, setTrailerMuted] = useState(true)
   const [trailerPlaying, setTrailerPlaying] = useState(false)
+  const [heroIdx, setHeroIdx] = useState(0)
+  const [heroFade, setHeroFade] = useState(true)
   const trailerRef = useRef<HTMLVideoElement>(null)
+  const rotateTimer = useRef<ReturnType<typeof setInterval> | null>(null)
 
   useEffect(() => { fetch('/api/session').catch(() => {}) }, [])
 
@@ -80,8 +85,45 @@ export default function Home() {
     description: m.title,
   })
 
-  // Featured = first movie with a thumbnail
-  const featured = allMovies.find((m) => m.thumbnail) ?? allMovies[0]
+  // Build hero candidates:
+  // - lang selected → latest movie of that language
+  // - no lang (All) → latest movie per language, rotate every 30s
+  const heroCandidates: MovieItem[] = (() => {
+    if (lang) {
+      const m = allMovies.find((x) => x.language === lang)
+      return m ? [m] : []
+    }
+    // one latest per language that has movies
+    return LANGUAGES
+      .map((l) => allMovies.find((x) => x.language === l))
+      .filter(Boolean) as MovieItem[]
+  })()
+
+  const featured = heroCandidates[heroIdx % Math.max(heroCandidates.length, 1)] ?? null
+
+  // Reset heroIdx when lang changes or movies load
+  useEffect(() => {
+    setHeroIdx(0)
+    setHeroFade(true)
+  }, [lang, allMovies.length])
+
+  // Auto-rotate only when "All" (no lang filter)
+  useEffect(() => {
+    if (rotateTimer.current) clearInterval(rotateTimer.current)
+    if (lang || heroCandidates.length <= 1) return
+
+    rotateTimer.current = setInterval(() => {
+      setHeroFade(false)
+      setTimeout(() => {
+        setHeroIdx((i) => (i + 1) % heroCandidates.length)
+        setHeroFade(true)
+      }, 400)
+    }, HERO_INTERVAL)
+
+    return () => {
+      if (rotateTimer.current) clearInterval(rotateTimer.current)
+    }
+  }, [lang, heroCandidates.length])
 
   const featuredYtId = featured?.trailerUrl?.startsWith('youtube:')
     ? featured.trailerUrl.slice(8)
@@ -90,7 +132,6 @@ export default function Home() {
     ? featured.trailerUrl
     : null
 
-  // Start video trailer autoplay when featured loads (only for direct video, not YouTube)
   useEffect(() => {
     const v = trailerRef.current
     if (!v || !featuredVideoTrailer) return
@@ -98,9 +139,9 @@ export default function Home() {
     v.play().then(() => setTrailerPlaying(true)).catch(() => {})
   }, [featuredVideoTrailer])
 
-  // YouTube iframe counts as "playing" immediately
   useEffect(() => {
     if (featuredYtId) setTrailerPlaying(true)
+    else setTrailerPlaying(false)
   }, [featuredYtId])
 
   const toggleMute = () => {
@@ -121,10 +162,11 @@ export default function Home() {
 
       {/* Hero */}
       {!loading && !search && featured && (
-        <div className={styles.hero}>
-          {/* Background — YouTube iframe / video trailer / poster image */}
+        <div className={`${styles.hero} ${heroFade ? styles.heroVisible : styles.heroHidden}`}>
+          {/* Background */}
           {featuredYtId ? (
             <iframe
+              key={featuredYtId}
               className={styles.heroBgVideo}
               src={`https://www.youtube.com/embed/${featuredYtId}?autoplay=1&mute=1&loop=1&playlist=${featuredYtId}&controls=0&showinfo=0&rel=0&modestbranding=1&iv_load_policy=3`}
               allow="autoplay; encrypted-media"
@@ -133,6 +175,7 @@ export default function Home() {
             />
           ) : featuredVideoTrailer ? (
             <video
+              key={featuredVideoTrailer}
               ref={trailerRef}
               className={styles.heroBgVideo}
               src={featuredVideoTrailer}
@@ -144,6 +187,7 @@ export default function Home() {
             />
           ) : (
             <div
+              key={featured.id}
               className={styles.heroBg}
               style={{ backgroundImage: featured.thumbnail ? `url(${featured.thumbnail})` : undefined }}
             />
@@ -170,7 +214,6 @@ export default function Home() {
                 </svg>
                 Watch Now
               </Link>
-              {/* Mute button only for direct video trailers — YouTube iframe handles its own audio */}
               {featuredVideoTrailer && trailerPlaying && (
                 <button className={styles.muteBtn} onClick={toggleMute} title={trailerMuted ? 'Unmute trailer' : 'Mute trailer'}>
                   {trailerMuted ? (
@@ -185,6 +228,20 @@ export default function Home() {
                 </button>
               )}
             </div>
+
+            {/* Rotation dots — only shown when "All" with multiple candidates */}
+            {!lang && heroCandidates.length > 1 && (
+              <div className={styles.heroDots}>
+                {heroCandidates.map((m, i) => (
+                  <button
+                    key={m.id}
+                    className={`${styles.heroRotDot} ${i === heroIdx % heroCandidates.length ? styles.heroRotDotActive : ''}`}
+                    onClick={() => { setHeroFade(false); setTimeout(() => { setHeroIdx(i); setHeroFade(true) }, 400) }}
+                    title={m.language}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -208,7 +265,6 @@ export default function Home() {
 
         {!loading && !error && !aiSearching && (
           <>
-            {/* AI Search Results */}
             {search && aiResults !== null && (
               <section className={styles.section}>
                 <div className={styles.sectionHeader}>
@@ -230,57 +286,88 @@ export default function Home() {
 
             {!search && (
               <>
-                {/* Latest uploads */}
-                <section className={styles.section}>
-                  <div className={styles.sectionHeader}>
-                    <div className={styles.sectionAccent} />
-                    <h2 className={styles.sectionTitle}>
-                      Latest Uploads
-                      {lang && <span className={styles.langBadge}>{lang.charAt(0).toUpperCase() + lang.slice(1)}</span>}
-                    </h2>
-                  </div>
-                  {baseFiltered.length > 0 ? (
-                    <div className={styles.row}>
-                      {baseFiltered.slice(0, 12).map((m) => (
-                        <div key={m.id} className={styles.rowItem}>
-                          <VideoCard video={toCard(m)} />
+                {/* ── Language selected: show that language's movies ── */}
+                {lang && (
+                  <>
+                    <section className={styles.section}>
+                      <div className={styles.sectionHeader}>
+                        <div className={styles.sectionAccent} />
+                        <h2 className={styles.sectionTitle}>
+                          Latest {lang.charAt(0).toUpperCase() + lang.slice(1)}
+                          <span className={styles.langBadge}>{lang.charAt(0).toUpperCase() + lang.slice(1)}</span>
+                        </h2>
+                      </div>
+                      {baseFiltered.length > 0 ? (
+                        <div className={styles.row}>
+                          {baseFiltered.slice(0, 12).map((m) => (
+                            <div key={m.id} className={styles.rowItem}>
+                              <VideoCard video={toCard(m)} />
+                            </div>
+                          ))}
                         </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className={styles.muted}>No movies uploaded yet.</p>
-                  )}
-                </section>
+                      ) : (
+                        <p className={styles.muted}>No {lang} movies uploaded yet.</p>
+                      )}
+                    </section>
 
-                {/* Genre rows */}
-                {genreRows.map((g) => (
-                  <section key={g} className={styles.section}>
-                    <div className={styles.sectionHeader}>
-                      <div className={styles.sectionAccent} />
-                      <h2 className={styles.sectionTitle}>
-                        {g.charAt(0).toUpperCase() + g.slice(1)}
-                      </h2>
-                    </div>
-                    <div className={styles.row}>
-                      {byGenre(g).map((m) => (
-                        <div key={m.id} className={styles.rowItem}>
-                          <VideoCard video={toCard(m)} />
+                    {genreRows.map((g) => (
+                      <section key={g} className={styles.section}>
+                        <div className={styles.sectionHeader}>
+                          <div className={styles.sectionAccent} />
+                          <h2 className={styles.sectionTitle}>
+                            {g.charAt(0).toUpperCase() + g.slice(1)}
+                          </h2>
                         </div>
-                      ))}
-                    </div>
-                  </section>
-                ))}
+                        <div className={styles.row}>
+                          {byGenre(g).map((m) => (
+                            <div key={m.id} className={styles.rowItem}>
+                              <VideoCard video={toCard(m)} />
+                            </div>
+                          ))}
+                        </div>
+                      </section>
+                    ))}
+                  </>
+                )}
 
-                {baseFiltered.length === 0 && (
-                  <section className={styles.section}>
-                    <div className={styles.sectionHeader}>
-                      <div className={styles.sectionAccent} />
-                      <h2 className={styles.sectionTitle}>Coming Soon</h2>
-                    </div>
-                    <div className={styles.grid}>
-                      {GENRES.map((g) => <ComingSoonCard key={g} genre={g} />)}
-                    </div>
-                  </section>
+                {/* ── All: one "Latest" row per language that has movies ── */}
+                {!lang && (
+                  <>
+                    {LANGUAGES
+                      .map((l) => ({ l, movies: allMovies.filter((m) => m.language === l) }))
+                      .filter(({ movies }) => movies.length > 0)
+                      .map(({ l, movies: langMovies }) => (
+                        <section key={l} className={styles.section}>
+                          <div className={styles.sectionHeader}>
+                            <div className={styles.sectionAccent} />
+                            <h2 className={styles.sectionTitle}>
+                              Latest {l.charAt(0).toUpperCase() + l.slice(1)}
+                              <span className={styles.langBadge}>{l.charAt(0).toUpperCase() + l.slice(1)}</span>
+                            </h2>
+                          </div>
+                          <div className={styles.row}>
+                            {langMovies.slice(0, 12).map((m) => (
+                              <div key={m.id} className={styles.rowItem}>
+                                <VideoCard video={toCard(m)} />
+                              </div>
+                            ))}
+                          </div>
+                        </section>
+                      ))
+                    }
+
+                    {allMovies.length === 0 && (
+                      <section className={styles.section}>
+                        <div className={styles.sectionHeader}>
+                          <div className={styles.sectionAccent} />
+                          <h2 className={styles.sectionTitle}>Coming Soon</h2>
+                        </div>
+                        <div className={styles.grid}>
+                          {GENRES.map((g) => <ComingSoonCard key={g} genre={g} />)}
+                        </div>
+                      </section>
+                    )}
+                  </>
                 )}
               </>
             )}

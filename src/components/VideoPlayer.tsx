@@ -32,6 +32,13 @@ const DISCO_PALETTES: Array<[string, string, string]> = [
 // Each bulb index maps to which palette color it uses (cycles across bulbs)
 const BULB_COLOR_IDX = [0,1,2,0,1,2,0,1,2,0,1,2]
 
+function hexToRgb(hex: string): [number, number, number] {
+  const r = parseInt(hex.slice(1,3), 16)
+  const g = parseInt(hex.slice(3,5), 16)
+  const b = parseInt(hex.slice(5,7), 16)
+  return [r, g, b]
+}
+
 export default function VideoPlayer({ src, poster, title }: { src: string; poster?: string; title?: string }) {
   const videoRef      = useRef<HTMLVideoElement>(null)
   const containerRef  = useRef<HTMLDivElement>(null)
@@ -78,6 +85,11 @@ export default function VideoPlayer({ src, poster, title }: { src: string; poste
   const [showSelector,    setShowSelector]    = useState(false)
   const [theaterChosen,   setTheaterChosen]   = useState(false)
   const playingRef        = useRef(false) // ref version for visibility handler
+  const [pipSupported,    setPipSupported]    = useState(false)
+
+  useEffect(() => {
+    setPipSupported('pictureInPictureEnabled' in document)
+  }, [])
 
   const fmt = (s: number) => {
     if (isNaN(s)) return '0:00'
@@ -158,6 +170,22 @@ export default function VideoPlayer({ src, poster, title }: { src: string; poste
         flashRef.current, sparkleRef.current,
       )
 
+      // Drive full-page room lighting via CSS vars on body
+      const b = bands
+      const [pr, pg, pb] = hexToRgb(palette[0])
+      const [sr, sg, sb] = hexToRgb(palette[1])
+      const beat = b.beat || b.bassEnergy > 0.5
+      document.body.style.setProperty('--disco-r',    `${pr}`)
+      document.body.style.setProperty('--disco-g',    `${pg}`)
+      document.body.style.setProperty('--disco-b',    `${pb}`)
+      document.body.style.setProperty('--disco-r2',   `${sr}`)
+      document.body.style.setProperty('--disco-g2',   `${sg}`)
+      document.body.style.setProperty('--disco-b2',   `${sb}`)
+      document.body.style.setProperty('--disco-bass', b.bassEnergy.toFixed(3))
+      document.body.style.setProperty('--disco-beat', beat ? '1' : '0')
+      document.body.style.setProperty('--disco-loud', b.loudness.toFixed(3))
+      document.body.setAttribute('data-disco', 'true')
+
     } else {
       // 'off' mode — clear all lights
       clearLights()
@@ -185,6 +213,11 @@ export default function VideoPlayer({ src, poster, title }: { src: string; poste
       el.style.opacity   = '0'
       el.style.boxShadow = 'none'
     })
+    // Clear full-page disco room effect
+    document.body.removeAttribute('data-disco')
+    document.body.style.removeProperty('--disco-bass')
+    document.body.style.removeProperty('--disco-beat')
+    document.body.style.removeProperty('--disco-loud')
   }
 
   const startTheater = useCallback(() => {
@@ -518,7 +551,7 @@ export default function VideoPlayer({ src, poster, title }: { src: string; poste
                   </div>
                 )}
               </div>
-              {'pictureInPictureEnabled' in document && (
+              {pipSupported && (
                 <button className={styles.btn} onClick={togglePip} title="Picture in Picture">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18">
                     <rect x="2" y="4" width="20" height="16" rx="2"/>

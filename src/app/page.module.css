@@ -17,7 +17,11 @@
   max-height: 860px;
   margin-bottom: 3rem;
   overflow: hidden;
+  transition: opacity 0.4s ease;
 }
+
+.heroVisible { opacity: 1; }
+.heroHidden  { opacity: 0; }
 
 /* Static poster background */
 .heroBg {
@@ -98,6 +102,34 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
+}
+
+/* Language rotation dots */
+.heroDots {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 1.4rem;
+}
+
+.heroRotDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.3);
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.3s, transform 0.3s;
+}
+
+.heroRotDot:hover {
+  background: rgba(255,255,255,0.6);
+}
+
+.heroRotDotActive {
+  background: var(--brand);
+  transform: scale(1.3);
 }
 
 .heroBtn {

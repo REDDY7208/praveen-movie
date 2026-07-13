@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import styles from './Navbar.module.css'
 
-const LANGUAGES = ['Telugu', 'Tamil', 'Malayalam', 'Hindi', 'English']
+const LANGUAGES = ['Telugu', 'Tamil', 'Malayalam', 'Kannada', 'Hindi', 'English']
 
 interface NavbarProps {
   onSearch?: (q: string) => void

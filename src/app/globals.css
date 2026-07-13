@@ -39,3 +39,60 @@ a { text-decoration: none; color: inherit; }
 ::-webkit-scrollbar-thumb:hover { background: var(--brand); }
 
 ::selection { background: rgba(255,107,53,0.3); }
+
+/* ── Disco Room Mode ─────────────────────────────────────────
+   Active when body[data-disco="true"] — full-page beat-reactive lighting
+   JS drives --disco-bass, --disco-beat, --disco-loud, --disco-r/g/b
+   ─────────────────────────────────────────────────────────── */
+
+body[data-disco="true"] {
+  --dr:  var(--disco-r,  255);
+  --dg:  var(--disco-g,  0);
+  --db:  var(--disco-b,  80);
+  --dr2: var(--disco-r2, 0);
+  --dg2: var(--disco-g2, 220);
+  --db2: var(--disco-b2, 255);
+}
+
+/* Left wall beam */
+body[data-disco="true"]::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0;
+  width: 260px;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 9999;
+  background: radial-gradient(ellipse at 0% 50%,
+    rgba(var(--dr), var(--dg), var(--db), 0.18) 0%,
+    transparent 70%
+  );
+  animation: discoLeftPulse 0.12s ease-out;
+}
+
+/* Right wall beam */
+body[data-disco="true"]::after {
+  content: '';
+  position: fixed;
+  top: 0; right: 0;
+  width: 260px;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 9999;
+  background: radial-gradient(ellipse at 100% 50%,
+    rgba(var(--dr2), var(--dg2), var(--db2), 0.18) 0%,
+    transparent 70%
+  );
+  animation: discoRightPulse 0.12s ease-out;
+}
+
+@keyframes discoLeftPulse {
+  0%   { opacity: 0.2; }
+  50%  { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+@keyframes discoRightPulse {
+  0%   { opacity: 0.2; }
+  50%  { opacity: 1; }
+  100% { opacity: 0.6; }
+}

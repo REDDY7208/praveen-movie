@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState } from 'react'
 import { getBgm, stopBgm } from '@/lib/bgm'
 import styles from './SplashScreen.module.css'
 
@@ -13,16 +13,16 @@ export default function SplashScreen() {
   const [done,     setDone]     = useState(false)
 
   useEffect(() => {
-    // Audio is already playing from login click (user gesture) — just grab it
     const audio = getBgm()
+    console.log('[splash] mounted — audio:', audio ? `found ✓ paused=${audio.paused}` : 'NOT FOUND ✕')
 
     const t1 = setTimeout(() => setTLanded(true),  0)
     const t2 = setTimeout(() => setPLanded(true),  1000)
     const t3 = setTimeout(() => setNameShow(true), 3000)
 
     const t4 = setTimeout(() => {
-      // Fade audio out
       if (audio) {
+        console.log('[splash] fading out audio...')
         const fade = setInterval(() => {
           if (audio.volume > 0.06) audio.volume = Math.max(0, audio.volume - 0.1)
           else { stopBgm(); clearInterval(fade) }
