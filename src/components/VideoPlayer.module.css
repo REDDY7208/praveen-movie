@@ -53,37 +53,15 @@
   pointer-events: none;
   z-index: 5;
   opacity: 0;
-  filter: blur(36px);
+  filter: blur(48px);
   border-radius: 50%;
-  transition: opacity 0.12s ease-out, background 0.12s ease-out;
 }
 
 .beamTop {
-  top: -72px;
-  left: 8%;
-  right: 8%;
-  height: 88px;
-}
-
-.beamBottom {
-  bottom: -72px;
-  left: 8%;
-  right: 8%;
-  height: 88px;
-}
-
-.beamLeft {
-  left: -72px;
-  top: 8%;
-  bottom: 8%;
-  width: 88px;
-}
-
-.beamRight {
-  right: -72px;
-  top: 8%;
-  bottom: 8%;
-  width: 88px;
+  top: -110px;
+  left: 4%;
+  right: 4%;
+  height: 130px;
 }
 
 /* Impact flash overlay — white flash on boom */
@@ -114,17 +92,43 @@
   transition: opacity 0.3s ease-out;
 }
 
-/* Disco bulb dots */
+/* Disco bulb dots — larger, more vivid */
 .discoBulb {
   position: absolute;
   z-index: 20;
-  width: 14px;
-  height: 14px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
-  transform: translate(-50%, -50%) scale(0.5);
+  transform: translate(-50%, -50%) scale(0.3);
   pointer-events: none;
   opacity: 0;
-  transition: opacity 0.05s ease-out, transform 0.05s ease-out, box-shadow 0.05s ease-out;
+  /* No CSS transition — JS sets every frame via rAF for snappy beat response */
+}
+
+/* ─── Disco room floor bounce (bottom beam extended) ─────── */
+.beamBottom {
+  bottom: -110px;
+  left: 4%;
+  right: 4%;
+  height: 130px;
+  filter: blur(55px);
+}
+
+/* ─── Disco side wall floods (wider) ─────────────────────── */
+.beamLeft {
+  left: -110px;
+  top: 4%;
+  bottom: 4%;
+  width: 130px;
+  filter: blur(55px);
+}
+
+.beamRight {
+  right: -110px;
+  top: 4%;
+  bottom: 4%;
+  width: 130px;
+  filter: blur(55px);
 }
 
 /* ─── Center play/replay button ─────────────────────────── */

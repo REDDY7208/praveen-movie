@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { startBgm } from '@/lib/bgm'
 import styles from './login.module.css'
 
 export default function LoginPage() {
@@ -9,7 +10,9 @@ export default function LoginPage() {
 
   const handleEnter = () => {
     setLoading(true)
-    // Mark that user has interacted — unlocks audio autoplay for this session
+    // Start audio HERE on the user gesture — this is the only reliable way
+    // to get autoplay permission across all browsers including mobile
+    startBgm()
     sessionStorage.setItem('tpSplash', '1')
     setTimeout(() => router.push('/'), 300)
   }

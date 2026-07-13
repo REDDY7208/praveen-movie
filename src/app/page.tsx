@@ -1,11 +1,12 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import Navbar from '@/components/Navbar'
 import VideoCard from '@/components/VideoCard'
 import ComingSoonCard from '@/components/ComingSoonCard'
 import AiChat from '@/components/AiChat'
-import { LANGUAGES, GENRES } from '@/lib/s3'
+import SplashScreen from '@/components/SplashScreen'
+import { GENRES } from '@/lib/s3'
 import type { MovieItem } from '@/lib/s3'
 import styles from './page.module.css'
 
@@ -17,6 +18,9 @@ export default function Home() {
   const [search, setSearch] = useState('')
   const [aiResults, setAiResults] = useState<MovieItem[] | null>(null)
   const [aiSearching, setAiSearching] = useState(false)
+  const [trailerMuted, setTrailerMuted] = useState(true)
+  const [trailerPlaying, setTrailerPlaying] = useState(false)
+  const trailerRef = useRef<HTMLVideoElement>(null)
 
   useEffect(() => { fetch('/api/session').catch(() => {}) }, [])
 
@@ -79,8 +83,36 @@ export default function Home() {
   // Featured = first movie with a thumbnail
   const featured = allMovies.find((m) => m.thumbnail) ?? allMovies[0]
 
+  const featuredYtId = featured?.trailerUrl?.startsWith('youtube:')
+    ? featured.trailerUrl.slice(8)
+    : null
+  const featuredVideoTrailer = featured?.trailerUrl && !featured.trailerUrl.startsWith('youtube:')
+    ? featured.trailerUrl
+    : null
+
+  // Start video trailer autoplay when featured loads (only for direct video, not YouTube)
+  useEffect(() => {
+    const v = trailerRef.current
+    if (!v || !featuredVideoTrailer) return
+    v.muted = true
+    v.play().then(() => setTrailerPlaying(true)).catch(() => {})
+  }, [featuredVideoTrailer])
+
+  // YouTube iframe counts as "playing" immediately
+  useEffect(() => {
+    if (featuredYtId) setTrailerPlaying(true)
+  }, [featuredYtId])
+
+  const toggleMute = () => {
+    const v = trailerRef.current
+    if (!v) return
+    v.muted = !v.muted
+    setTrailerMuted(v.muted)
+  }
+
   return (
     <>
+      <SplashScreen />
       <Navbar
         onSearch={handleSearch}
         activeLang={lang}
@@ -90,10 +122,32 @@ export default function Home() {
       {/* Hero */}
       {!loading && !search && featured && (
         <div className={styles.hero}>
-          <div
-            className={styles.heroBg}
-            style={{ backgroundImage: featured.thumbnail ? `url(${featured.thumbnail})` : undefined }}
-          />
+          {/* Background — YouTube iframe / video trailer / poster image */}
+          {featuredYtId ? (
+            <iframe
+              className={styles.heroBgVideo}
+              src={`https://www.youtube.com/embed/${featuredYtId}?autoplay=1&mute=1&loop=1&playlist=${featuredYtId}&controls=0&showinfo=0&rel=0&modestbranding=1&iv_load_policy=3`}
+              allow="autoplay; encrypted-media"
+              allowFullScreen
+              title="Trailer"
+            />
+          ) : featuredVideoTrailer ? (
+            <video
+              ref={trailerRef}
+              className={styles.heroBgVideo}
+              src={featuredVideoTrailer}
+              muted
+              loop
+              playsInline
+              autoPlay
+              onPlay={() => setTrailerPlaying(true)}
+            />
+          ) : (
+            <div
+              className={styles.heroBg}
+              style={{ backgroundImage: featured.thumbnail ? `url(${featured.thumbnail})` : undefined }}
+            />
+          )}
           <div className={styles.heroGrad} />
           <div className={styles.heroContent}>
             <p className={styles.heroEyebrow}>✦ Featured Film</p>
@@ -109,12 +163,28 @@ export default function Home() {
                 <span style={{ textTransform: 'capitalize' }}>{featured.genre}</span>
               )}
             </div>
-            <Link href={`/watch/${featured.id}`} className={styles.heroBtn}>
-              <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-                <polygon points="6,3 20,12 6,21"/>
-              </svg>
-              Watch Now
-            </Link>
+            <div className={styles.heroBtns}>
+              <Link href={`/watch/${featured.id}`} className={styles.heroBtn}>
+                <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                  <polygon points="6,3 20,12 6,21"/>
+                </svg>
+                Watch Now
+              </Link>
+              {/* Mute button only for direct video trailers — YouTube iframe handles its own audio */}
+              {featuredVideoTrailer && trailerPlaying && (
+                <button className={styles.muteBtn} onClick={toggleMute} title={trailerMuted ? 'Unmute trailer' : 'Mute trailer'}>
+                  {trailerMuted ? (
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
+                      <path d="M16.5 12A4.5 4.5 0 0014 7.97v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51A8.796 8.796 0 0021 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06A8.99 8.99 0 0017.73 19L19 20.27 20.27 19 5.27 4 4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>
+                    </svg>
+                  ) : (
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
+                      <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0014 7.97v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77 0-4.28-2.99-7.86-7-8.77z"/>
+                    </svg>
+                  )}
+                </button>
+              )}
+            </div>
           </div>
         </div>
       )}

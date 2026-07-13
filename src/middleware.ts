@@ -62,6 +62,7 @@ export function middleware(req: NextRequest) {
       "img-src 'self' data: https: blob:",
       "media-src 'self' https: blob:",                    // allow S3 presigned video URLs
       "connect-src 'self' https:",
+      "frame-src 'self' https://www.youtube.com https://youtube.com",
       "frame-ancestors 'none'",
     ].join('; ')
   )

@@ -14,7 +14,13 @@ export default function VideoCard({ video }: { video: Video }) {
         {video.thumbnail ? (
           <img src={video.thumbnail} alt={video.title} loading="lazy" />
         ) : (
-          <div className={styles.noThumb}>🎬</div>
+          <div className={styles.noThumb}>
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="2" y="2" width="20" height="20" rx="2.5"/>
+              <polygon points="10,8 16,12 10,16" fill="rgba(255,255,255,0.6)" stroke="none"/>
+            </svg>
+            <span className={styles.noThumbLabel}>No Poster</span>
+          </div>
         )}
 
         {genre && <span className={styles.genreBadge}>{genre}</span>}

@@ -8,19 +8,29 @@ import { EffectManager }  from '@/lib/theater/EffectManager'
 import { LightController } from '@/lib/theater/LightController'
 import type { TheaterMode } from '@/lib/theater/types'
 
-// 8 disco bulb positions (% relative to player — overflow:visible lets them appear outside)
+// 12 disco bulb positions — 4 top, 4 bottom, 2 left, 2 right (outside the player)
 const BULB_POS = [
-  { x:8,  y:-16 }, { x:28, y:-16 }, { x:52, y:-16 }, { x:74, y:-16 },
-  { x:8,  y:110 }, { x:28, y:110 }, { x:52, y:110 }, { x:74, y:110 },
+  // top row
+  { x: 6,  y: -22 }, { x: 26, y: -22 }, { x: 52, y: -22 }, { x: 76, y: -22 },
+  // bottom row
+  { x: 6,  y: 112 }, { x: 26, y: 112 }, { x: 52, y: 112 }, { x: 76, y: 112 },
+  // left column
+  { x: -8, y: 25  }, { x: -8, y: 65  },
+  // right column
+  { x: 108, y: 25 }, { x: 108, y: 65 },
 ]
 
-const DISCO_COLORS = [
-  ['#ff1e64','#ff80b0','#ffb0d0'],
-  ['#00c8ff','#40e8ff','#b0f8ff'],
-  ['#b400ff','#d060ff','#e8b0ff'],
-  ['#ffa000','#ffd040','#fff0a0'],
-  ['#00ff78','#40ffb0','#a0ffe0'],
+// 5 disco palettes matching EffectManager — [primary, secondary, accent]
+const DISCO_PALETTES: Array<[string, string, string]> = [
+  ['#ff0050', '#00dcff', '#ffdc00'],
+  ['#b400ff', '#00ff78', '#ff6400'],
+  ['#00b4ff', '#ff00a0', '#00ff50'],
+  ['#ffa000', '#0050ff', '#ff0078'],
+  ['#00ffc8', '#ff3232', '#c800ff'],
 ]
+
+// Each bulb index maps to which palette color it uses (cycles across bulbs)
+const BULB_COLOR_IDX = [0,1,2,0,1,2,0,1,2,0,1,2]
 
 export default function VideoPlayer({ src, poster, title }: { src: string; poster?: string; title?: string }) {
   const videoRef      = useRef<HTMLVideoElement>(null)
@@ -118,27 +128,33 @@ export default function VideoPlayer({ src, poster, title }: { src: string; poste
 
     } else if (mode === 'disco') {
       discoRef.current.update(bands, vt, now)
-      const isFast = bands.bassEnergy > 0.5 || bands.peak
+      const isFast = bands.bassEnergy > 0.45 || bands.peak
       const state  = lcRef.current.step(isFast)
-      const themeIdx = Math.floor(vt / 600) % 5
-      const colors   = DISCO_COLORS[themeIdx]
+      const palIdx = Math.floor(vt / 480) % DISCO_PALETTES.length
+      const palette = DISCO_PALETTES[palIdx]
 
       bulbRefs.current.forEach((el, i) => {
         if (!el) return
-        const br = state.bulbs[i] ?? 0
-        const c  = colors[i % 3]
-        el.style.opacity    = br.toFixed(3)
-        el.style.transform  = `translate(-50%,-50%) scale(${0.4 + br * 1.4})`
-        el.style.background = c
-        el.style.boxShadow  = br > 0.08
-          ? `0 0 ${(8+br*28).toFixed(0)}px ${(6+br*18).toFixed(0)}px ${c}88`
-          : 'none'
+        const br  = state.bulbs[i] ?? 0
+        const hex = palette[BULB_COLOR_IDX[i] ?? 0]
+        const scale = 0.3 + br * 2.2   // bulbs grow big on beat
+        el.style.opacity   = Math.min(br * 1.4, 1).toFixed(3)
+        el.style.transform = `translate(-50%,-50%) scale(${scale.toFixed(3)})`
+        el.style.background = hex
+        if (br > 0.05) {
+          const gSize = (12 + br * 55).toFixed(0)
+          const gBlur = (8  + br * 40).toFixed(0)
+          el.style.boxShadow = `0 0 ${gSize}px ${gBlur}px ${hex}cc, 0 0 ${(+gSize*2).toFixed(0)}px ${(+gBlur*2).toFixed(0)}px ${hex}55`
+        } else {
+          el.style.boxShadow = 'none'
+        }
       })
 
+      // Apply glow + beams via LightController (colors set by EffectManager)
       lcRef.current.apply(
         glowRef.current, topRef.current, bottomRef.current,
         leftRef.current, rightRef.current,
-        [], // bulbs handled above with disco colors
+        [],   // bulbs handled above
         flashRef.current, sparkleRef.current,
       )
 
@@ -380,7 +396,7 @@ export default function VideoPlayer({ src, poster, title }: { src: string; poste
         <div ref={flashRef}    className={styles.flashOverlay}  />
         <div ref={sparkleRef}  className={styles.sparkleOverlay}/>
 
-        {/* 8 Disco / Cinema bulbs */}
+        {/* 12 Disco bulbs — 4 top, 4 bottom, 2 left, 2 right */}
         {BULB_POS.map((pos, i) => (
           <div
             key={i}

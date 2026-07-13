@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useState, useRef } from 'react'
+import { getBgm, stopBgm } from '@/lib/bgm'
 import styles from './SplashScreen.module.css'
 
 export default function SplashScreen() {
@@ -10,19 +11,10 @@ export default function SplashScreen() {
   const [pExit,    setPExit]    = useState(false)
   const [fadeOut,  setFadeOut]  = useState(false)
   const [done,     setDone]     = useState(false)
-  const audioRef = useRef<HTMLAudioElement>(null)
 
   useEffect(() => {
-    // Only play if user navigated from login (their click = user gesture)
-    const canPlay = sessionStorage.getItem('tpSplash') === '1'
-    sessionStorage.removeItem('tpSplash') // consume it
-
-    const playTimer = setTimeout(() => {
-      if (canPlay && audioRef.current) {
-        audioRef.current.volume = 0.85
-        audioRef.current.play().catch(() => {})
-      }
-    }, 100)
+    // Audio is already playing from login click (user gesture) — just grab it
+    const audio = getBgm()
 
     const t1 = setTimeout(() => setTLanded(true),  0)
     const t2 = setTimeout(() => setPLanded(true),  1000)
@@ -30,11 +22,10 @@ export default function SplashScreen() {
 
     const t4 = setTimeout(() => {
       // Fade audio out
-      const a = audioRef.current
-      if (a) {
+      if (audio) {
         const fade = setInterval(() => {
-          if (a.volume > 0.06) a.volume = Math.max(0, a.volume - 0.1)
-          else { a.pause(); clearInterval(fade) }
+          if (audio.volume > 0.06) audio.volume = Math.max(0, audio.volume - 0.1)
+          else { stopBgm(); clearInterval(fade) }
         }, 80)
       }
       setNameShow(false)
@@ -46,9 +37,7 @@ export default function SplashScreen() {
     const t6 = setTimeout(() => setDone(true),    8000)
 
     return () => {
-      clearTimeout(playTimer)
       ;[t1,t2,t3,t4,t5,t6].forEach(clearTimeout)
-      if (audioRef.current) audioRef.current.pause()
     }
   }, [])
 
@@ -56,9 +45,6 @@ export default function SplashScreen() {
 
   return (
     <div className={`${styles.splash} ${fadeOut ? styles.fadeOut : ''}`}>
-      {/* Audio element in DOM — more reliable than JS Audio() across navigation */}
-      <audio ref={audioRef} src="/splash.mp3" preload="auto" />
-
       <div className={styles.logoWrap}>
         <span className={`
           ${styles.letter} ${styles.letterT}

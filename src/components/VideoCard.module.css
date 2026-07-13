@@ -31,6 +31,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center top;
   transition: transform 0.4s ease;
 }
 
@@ -42,11 +43,23 @@
   width: 100%;
   height: 100%;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: 3rem;
-  background: linear-gradient(135deg, #0d0d1a, #1a1a2e);
-  opacity: 0.5;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, #0d0d1a 0%, #1a1a2e 60%, #0f0f20 100%);
+}
+
+.noThumb svg {
+  opacity: 0.18;
+}
+
+.noThumbLabel {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.15);
 }
 
 /* Gradient overlay always present */

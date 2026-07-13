@@ -15,13 +15,19 @@ export function startBgm() {
   }
   const audio = new Audio('/splash.mp3')
   audio.volume = 0.85
-  audio.play().catch(() => {})
+  const playPromise = audio.play()
+  playPromise
+    .then(() => console.log('[bgm] ✓ audio playing'))
+    .catch((e) => console.error('[bgm] ✕ play() blocked:', e.message))
   window.__tpBgm = audio
+  console.log('[bgm] startBgm() called — audio created and stored on window.__tpBgm')
 }
 
 export function getBgm(): HTMLAudioElement | null {
   if (typeof window === 'undefined') return null
-  return window.__tpBgm ?? null
+  const audio = window.__tpBgm ?? null
+  console.log('[bgm] getBgm() —', audio ? `found, paused=${audio.paused}, currentTime=${audio.currentTime.toFixed(2)}` : 'NOT FOUND (null)')
+  return audio
 }
 
 export function stopBgm() {
@@ -29,5 +35,6 @@ export function stopBgm() {
   if (window.__tpBgm) {
     window.__tpBgm.pause()
     window.__tpBgm = undefined
+    console.log('[bgm] stopBgm() — audio stopped and cleared')
   }
 }
