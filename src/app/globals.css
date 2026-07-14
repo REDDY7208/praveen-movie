@@ -1,6 +1,6 @@
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
   --brand: #ff6b35;
@@ -16,22 +16,40 @@
   --text: #f0f0fa;
   --text2: #9090b0;
   --muted: #50506a;
+  /* Safe area for notched / Dynamic Island phones */
+  --safe-top:    env(safe-area-inset-top,    0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left:   env(safe-area-inset-left,   0px);
+  --safe-right:  env(safe-area-inset-right,  0px);
 }
 
-html { scroll-behavior: smooth; }
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
 
 body {
   font-family: 'Outfit', 'Segoe UI', system-ui, sans-serif;
   background: var(--bg);
   color: var(--text);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
+  min-height: 100dvh;
   background-image:
     radial-gradient(ellipse 80% 50% at 50% -10%, rgba(255,107,53,0.08) 0%, transparent 60%),
     radial-gradient(ellipse 60% 40% at 80% 80%, rgba(100,60,255,0.05) 0%, transparent 50%);
+  overflow-x: hidden;
 }
 
 a { text-decoration: none; color: inherit; }
+
+/* Remove tap highlight & delay on all interactive elements */
+button, a, [role="button"], input, select, label {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
 
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -40,11 +58,7 @@ a { text-decoration: none; color: inherit; }
 
 ::selection { background: rgba(255,107,53,0.3); }
 
-/* ── Disco Room Mode ─────────────────────────────────────────
-   Active when body[data-disco="true"] — full-page beat-reactive lighting
-   JS drives --disco-bass, --disco-beat, --disco-loud, --disco-r/g/b
-   ─────────────────────────────────────────────────────────── */
-
+/* ── Disco Room Mode ──────────────────────────────────────── */
 body[data-disco="true"] {
   --dr:  var(--disco-r,  255);
   --dg:  var(--disco-g,  0);
@@ -54,7 +68,6 @@ body[data-disco="true"] {
   --db2: var(--disco-b2, 255);
 }
 
-/* Left wall beam */
 body[data-disco="true"]::before {
   content: '';
   position: fixed;
@@ -70,7 +83,6 @@ body[data-disco="true"]::before {
   animation: discoLeftPulse 0.12s ease-out;
 }
 
-/* Right wall beam */
 body[data-disco="true"]::after {
   content: '';
   position: fixed;

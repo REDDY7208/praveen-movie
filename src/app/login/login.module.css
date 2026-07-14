@@ -1,5 +1,6 @@
 .page {
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -7,9 +8,11 @@
   position: relative;
   background: #000;
   overflow: hidden;
+  /* Respect notch */
+  padding-top:    var(--safe-top);
+  padding-bottom: var(--safe-bottom);
 }
 
-/* Blurred movie-poster background */
 .bg {
   position: absolute;
   inset: 0;
@@ -32,11 +35,10 @@
   );
 }
 
-/* TP Logo — Netflix style */
 .logo {
   position: absolute;
-  top: 1.8rem;
-  left: 2.5rem;
+  top: max(1.8rem, calc(var(--safe-top) + 1rem));
+  left: max(2.5rem, calc(var(--safe-left) + 1rem));
   font-size: 3rem;
   font-weight: 900;
   color: #e50914;
@@ -53,6 +55,9 @@
   flex-direction: column;
   align-items: center;
   gap: 2.5rem;
+  padding: 1.5rem;
+  width: 100%;
+  max-width: 480px;
 }
 
 .heading {
@@ -60,6 +65,7 @@
   font-weight: 400;
   color: #fff;
   letter-spacing: 0.5px;
+  text-align: center;
 }
 
 .profiles {
@@ -77,21 +83,13 @@
   background: none;
   border: none;
   cursor: pointer;
-  padding: 0;
+  padding: 0.5rem;
   transition: transform 0.2s;
 }
 
-.profile:hover {
-  transform: scale(1.08);
-}
-
-.profile:hover .avatar {
-  border: 3px solid #fff;
-}
-
-.profile:hover .name {
-  color: #fff;
-}
+.profile:hover { transform: scale(1.08); }
+.profile:hover .avatar { border: 3px solid #fff; }
+.profile:hover .name   { color: #fff; }
 
 .avatar {
   width: 120px;
@@ -121,7 +119,6 @@
   letter-spacing: 0.3px;
 }
 
-/* Loading spinner */
 .spinner {
   width: 36px;
   height: 36px;
@@ -131,6 +128,21 @@
   animation: spin 0.7s linear infinite;
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Mobile ──────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .logo { font-size: 2.4rem; top: max(1.2rem, calc(var(--safe-top) + 0.75rem)); left: 1.5rem; }
+  .heading { font-size: 1.6rem; }
+  .avatar { width: 100px; height: 100px; }
+  .avatarInitial { font-size: 3rem; }
+  .center { gap: 2rem; }
+  .profiles { gap: 2rem; }
+}
+
+@media (max-width: 360px) {
+  .avatar { width: 84px; height: 84px; }
+  .avatarInitial { font-size: 2.5rem; }
+  .heading { font-size: 1.35rem; }
+  .logo { font-size: 2rem; }
 }

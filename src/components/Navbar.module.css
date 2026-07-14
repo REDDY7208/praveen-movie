@@ -2,10 +2,12 @@
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(8,8,16,0.85);
+  background: rgba(8,8,16,0.88);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid rgba(255,255,255,0.06);
+  /* Safe area: push down on notched phones */
+  padding-top: var(--safe-top);
 }
 
 .top {
@@ -13,7 +15,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 0.75rem 2rem;
-  gap: 1.5rem;
+  gap: 1rem;
   max-width: 1500px;
   margin: 0 auto;
 }
@@ -28,7 +30,7 @@
   background-clip: text;
   letter-spacing: -1px;
   text-decoration: none;
-  min-width: 48px;
+  flex-shrink: 0;
   filter: drop-shadow(0 0 12px rgba(255,107,53,0.5));
   font-style: italic;
 }
@@ -42,7 +44,14 @@
   border: 1px solid rgba(255,255,255,0.07);
   border-radius: 30px;
   padding: 0.3rem;
+  /* Allow it to shrink and scroll on small screens */
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
 }
+.langTabs::-webkit-scrollbar { display: none; }
 
 .langBtn {
   padding: 0.32rem 0.9rem;
@@ -55,13 +64,13 @@
   cursor: pointer;
   transition: all 0.2s;
   white-space: nowrap;
+  flex-shrink: 0;
   font-family: inherit;
+  /* Minimum tap target 44px height */
+  min-height: 32px;
 }
 
-.langBtn:hover {
-  color: var(--text);
-  background: rgba(255,255,255,0.06);
-}
+.langBtn:hover { color: var(--text); background: rgba(255,255,255,0.06); }
 
 .langActive {
   background: linear-gradient(135deg, #ff6b35, #e04010) !important;
@@ -70,11 +79,12 @@
   box-shadow: 0 2px 12px rgba(255,107,53,0.4);
 }
 
-/* Right */
+/* Right section */
 .right {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.6rem;
+  flex-shrink: 0;
 }
 
 .search {
@@ -101,11 +111,12 @@
   width: 150px;
   font-family: inherit;
   transition: width 0.2s;
+  /* Prevent iOS zoom on focus (font-size must be ≥ 16px equivalent) */
+  font-size: 16px;
 }
 
 .search input:focus { width: 200px; }
-
-.search input::placeholder { color: var(--muted); }
+.search input::placeholder { color: var(--muted); font-size: 14px; }
 
 .search button {
   padding: 0.42rem 0.8rem;
@@ -116,12 +127,11 @@
   cursor: pointer;
   font-size: 0.9rem;
   transition: color 0.15s, background 0.15s;
+  min-width: 40px;
+  min-height: 40px;
 }
 
-.search button:hover {
-  color: #fff;
-  background: rgba(255,107,53,0.2);
-}
+.search button:hover { color: #fff; background: rgba(255,107,53,0.2); }
 
 .profileWrap {
   display: flex;
@@ -132,6 +142,7 @@
   border-radius: 30px;
   border: 1px solid rgba(255,255,255,0.08);
   transition: border-color 0.2s, background 0.2s;
+  flex-shrink: 0;
 }
 
 .profileWrap:hover {
@@ -140,8 +151,8 @@
 }
 
 .avatar {
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   background: linear-gradient(135deg, #ff6b35, #e04010);
   display: flex;
@@ -150,6 +161,7 @@
   font-size: 0.85rem;
   font-weight: 800;
   color: #fff;
+  flex-shrink: 0;
 }
 
 .profileName {
@@ -158,13 +170,27 @@
   color: var(--text2);
 }
 
+/* ── Tablet ──────────────────────────────────────────────── */
 @media (max-width: 900px) {
-  .top { padding: 0.65rem 1rem; gap: 0.75rem; }
+  .top { padding: 0.65rem 1rem; }
   .profileName { display: none; }
-  .search input { width: 100px; }
-  .langBtn { padding: 0.28rem 0.6rem; font-size: 0.75rem; }
+  .search input { width: 110px; }
+  .search input:focus { width: 150px; }
+  .langBtn { padding: 0.28rem 0.65rem; font-size: 0.78rem; }
 }
 
+/* ── Mobile ──────────────────────────────────────────────── */
 @media (max-width: 600px) {
-  .langTabs { display: none; }
+  .top { padding: 0.55rem 0.85rem; gap: 0.5rem; }
+  .langTabs { padding: 0.2rem; }
+  .langBtn { padding: 0.26rem 0.5rem; font-size: 0.73rem; }
+  .search input { width: 80px; font-size: 16px; }
+  .search input:focus { width: 110px; }
+  .logo { font-size: 1.4rem; }
+}
+
+/* ── Small phones ────────────────────────────────────────── */
+@media (max-width: 390px) {
+  .search { display: none; }
+  .langBtn { padding: 0.24rem 0.45rem; font-size: 0.7rem; }
 }

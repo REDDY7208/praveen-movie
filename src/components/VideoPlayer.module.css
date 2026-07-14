@@ -396,3 +396,43 @@
 .speedItem:hover { background: rgba(255,255,255,0.07); color: #fff; }
 .speedOn  { color: #fff; font-weight: 600; }
 .speedCheck { color: #ff6b35; font-size: 0.75rem; }
+
+/* ─── Mobile responsive ──────────────────────────────────── */
+@media (max-width: 600px) {
+  /* Larger touch targets on mobile */
+  .btn { padding: 8px 7px; }
+
+  /* Hide volume slider on mobile — just toggle mute */
+  .volGroup:hover .volSliderWrap { width: 0; }
+  .volSliderWrap { display: none; }
+
+  /* Time label shorter */
+  .timeLabel { font-size: 0.72rem; padding: 0 3px; }
+  .timeSep { margin: 0 1px; }
+
+  /* Speed menu opens upward and stays inside screen */
+  .speedMenu { right: 0; min-width: 110px; }
+  .speedItem { padding: 9px 12px; font-size: 0.82rem; }
+
+  /* Bigger skip nudge area */
+  .nudgeR { right: 8%; }
+  .nudgeL { left: 8%; }
+
+  /* Center play button larger tap area */
+  .centerBtn span {
+    width: 64px;
+    height: 64px;
+  }
+
+  /* Progress bar — thicker for easier touch scrubbing */
+  .progressArea { padding: 0.75rem 0.85rem 0.3rem; }
+  .progressTrack { height: 5px; }
+  .progressArea:hover .progressTrack { height: 7px; }
+  .progressThumb { width: 16px; height: 16px; }
+}
+
+@media (max-width: 380px) {
+  .btn { padding: 7px 5px; }
+  .skipLabel { display: none; }
+  .timeLabel { font-size: 0.68rem; }
+}

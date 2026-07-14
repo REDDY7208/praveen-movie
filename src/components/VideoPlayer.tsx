@@ -91,6 +91,10 @@ export default function VideoPlayer({ src, poster, title }: { src: string; poste
     setPipSupported('pictureInPictureEnabled' in document)
   }, [])
 
+  // Touch / double-tap tracking
+  const lastTapRef     = useRef(0)
+  const tapTimerRef    = useRef<ReturnType<typeof setTimeout> | null>(null)
+
   const fmt = (s: number) => {
     if (isNaN(s)) return '0:00'
     const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60)
@@ -373,6 +377,35 @@ export default function VideoPlayer({ src, poster, title }: { src: string; poste
     document.body.appendChild(a); a.click(); document.body.removeChild(a)
   }
 
+  // ── Touch: tap to show controls, double-tap to seek ±10s ──
+  const handleTouchEnd = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
+    // Ignore touches on controls overlay
+    if ((e.target as HTMLElement).closest('[class*="controls"]')) return
+
+    const now = Date.now()
+    const DOUBLE_TAP_MS = 280
+    const touch = e.changedTouches[0]
+    const containerW = containerRef.current?.offsetWidth ?? 1
+
+    if (now - lastTapRef.current < DOUBLE_TAP_MS) {
+      // Double-tap: seek based on left/right side
+      if (tapTimerRef.current) { clearTimeout(tapTimerRef.current); tapTimerRef.current = null }
+      const tapX = touch.clientX - (containerRef.current?.getBoundingClientRect().left ?? 0)
+      if (tapX < containerW / 2) {
+        skip(-10)
+      } else {
+        skip(10)
+      }
+      lastTapRef.current = 0
+    } else {
+      lastTapRef.current = now
+      // Single tap — toggle controls after short delay (cancellable by double-tap)
+      tapTimerRef.current = setTimeout(() => {
+        resetHide()
+      }, DOUBLE_TAP_MS)
+    }
+  }, [skip, resetHide])
+
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       const tag = (e.target as HTMLElement).tagName
@@ -419,6 +452,7 @@ export default function VideoPlayer({ src, poster, title }: { src: string; poste
         className={`${styles.wrap} ${fullscreen ? styles.fs : ''}`}
         onMouseMove={resetHide}
         onMouseLeave={() => playing && setShowControls(false)}
+        onTouchEnd={handleTouchEnd}
       >
         {/* ── Theater light elements ─────────────────────── */}
         <div ref={glowRef}     className={styles.glowBorder}    />
@@ -447,6 +481,7 @@ export default function VideoPlayer({ src, poster, title }: { src: string; poste
           className={styles.video}
           onTimeUpdate={onTimeUpdate}
           onLoadedMetadata={onLoaded}
+          playsInline
           onEnded={() => {
             setPlaying(false); playingRef.current = false; setEnded(true); setShowControls(true)
             cinemaRef.current.onEnded()

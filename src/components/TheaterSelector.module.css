@@ -1,64 +1,47 @@
-/* ── Full-screen overlay — fades in like splash ── */
+/* ── Overlay ─────────────────────────────────────────────── */
 .overlay {
   position: fixed;
   inset: 0;
   z-index: 200;
-  background: rgba(0, 0, 0, 0);
+  background: rgba(0,0,0,0);
   display: flex;
   align-items: center;
   justify-content: center;
   transition: background 0.5s ease;
   pointer-events: none;
+  /* Safe area padding */
+  padding: max(1rem, var(--safe-top)) max(1rem, var(--safe-right)) max(1rem, var(--safe-bottom)) max(1rem, var(--safe-left));
 }
+.overlayIn  { background: rgba(0,0,0,0.92); pointer-events: all; }
+.overlayOut { background: rgba(0,0,0,0) !important; pointer-events: none; transition: background 0.4s ease; }
 
-.overlayIn {
-  background: rgba(0, 0, 0, 0.92);
-  pointer-events: all;
-}
-
-.overlayOut {
-  background: rgba(0, 0, 0, 0) !important;
-  pointer-events: none;
-  transition: background 0.4s ease;
-}
-
-/* ── Inner — no card border, just content centered ── */
+/* ── Inner ───────────────────────────────────────────────── */
 .inner {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 1.6rem;
-  width: min(480px, calc(100vw - 2rem));
+  width: min(480px, 100%);
   text-align: center;
 }
 
-/* ── Logo mark — drops in from top like splash letters ── */
+/* ── Logo mark ───────────────────────────────────────────── */
 .logoMark {
   font-size: 3.6rem;
   opacity: 0;
   transform: translateY(-60px) scale(0.4);
   transition: none;
-  filter: drop-shadow(0 0 24px rgba(229, 9, 20, 0.7));
+  filter: drop-shadow(0 0 24px rgba(229,9,20,0.7));
 }
-
 .logoIn {
   opacity: 1;
   transform: translateY(0) scale(1);
-  transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1),
-              opacity 0.5s ease;
+  transition: transform 0.8s cubic-bezier(0.22,1,0.36,1), opacity 0.5s ease;
 }
 
-/* ── Title block — rises up like brandName in splash ── */
-.titleBlock {
-  opacity: 0;
-  transform: translateY(16px);
-  transition: opacity 0.6s ease, transform 0.6s ease;
-}
-
-.titleIn {
-  opacity: 1;
-  transform: translateY(0);
-}
+/* ── Title ───────────────────────────────────────────────── */
+.titleBlock { opacity: 0; transform: translateY(16px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.titleIn    { opacity: 1; transform: translateY(0); }
 
 .headline {
   font-size: 1.5rem;
@@ -68,33 +51,21 @@
   letter-spacing: 2px;
   text-transform: uppercase;
   margin: 0 0 0.35rem;
-  text-shadow: 0 0 30px rgba(229, 9, 20, 0.45);
+  text-shadow: 0 0 30px rgba(229,9,20,0.45);
 }
+.sub { font-size: 0.8rem; color: rgba(255,255,255,0.38); margin: 0; letter-spacing: 0.5px; }
 
-.sub {
-  font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.38);
-  margin: 0;
-  letter-spacing: 0.5px;
-}
+/* ── Cards ───────────────────────────────────────────────── */
+.cards { display: flex; flex-direction: column; gap: 0.6rem; width: 100%; }
 
-/* ── Cards row ── */
-.cards {
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-  width: 100%;
-}
-
-/* ── Each card — slides up with stagger ── */
 .card {
   display: flex;
   align-items: center;
   gap: 1rem;
   padding: 1rem 1.2rem;
   border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  background: rgba(255,255,255,0.04);
   cursor: pointer;
   text-align: left;
   font-family: inherit;
@@ -102,13 +73,16 @@
   width: 100%;
   opacity: 0;
   transform: translateY(30px);
-  transition: opacity 0.5s ease var(--card-delay, 0ms),
-              transform 0.5s cubic-bezier(0.22, 1, 0.36, 1) var(--card-delay, 0ms),
-              background 0.2s ease,
-              border-color 0.2s ease,
-              box-shadow 0.2s ease;
+  transition:
+    opacity 0.5s ease var(--card-delay, 0ms),
+    transform 0.5s cubic-bezier(0.22,1,0.36,1) var(--card-delay, 0ms),
+    background 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
   position: relative;
   overflow: hidden;
+  /* Minimum tap height */
+  min-height: 64px;
 }
 
 .card::before {
@@ -119,57 +93,30 @@
   opacity: 0;
   transition: opacity 0.2s ease;
 }
-
 .card:hover::before { opacity: 0.06; }
 
-.cardIn {
-  opacity: 1;
-  transform: translateY(0);
-}
+.cardIn { opacity: 1; transform: translateY(0); }
 
 .card:hover {
   border-color: var(--card-color, rgba(255,107,53,0.4));
-  box-shadow: 0 0 0 1px var(--card-color, rgba(255,107,53,0.15)),
-              0 8px 32px rgba(0,0,0,0.4);
+  box-shadow: 0 0 0 1px var(--card-color, rgba(255,107,53,0.15)), 0 8px 32px rgba(0,0,0,0.4);
   transform: translateY(-2px);
 }
 
 .cardPicked {
   border-color: var(--card-color, #ff6b35) !important;
-  background: rgba(255, 255, 255, 0.08) !important;
+  background: rgba(255,255,255,0.08) !important;
   transform: scale(0.97) !important;
   opacity: 0.6 !important;
   transition: all 0.3s ease !important;
 }
 
-.cardIcon {
-  font-size: 2rem;
-  flex-shrink: 0;
-  position: relative;
-  z-index: 1;
-}
+.cardIcon  { font-size: 2rem; flex-shrink: 0; position: relative; z-index: 1; }
 
-.cardBody {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-  flex: 1;
-  position: relative;
-  z-index: 1;
-}
+.cardBody  { display: flex; flex-direction: column; gap: 0.2rem; flex: 1; position: relative; z-index: 1; }
 
-.cardTitle {
-  font-size: 1rem;
-  font-weight: 800;
-  color: #fff;
-  letter-spacing: 0.3px;
-}
-
-.cardDesc {
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.4);
-  line-height: 1.4;
-}
+.cardTitle { font-size: 1rem; font-weight: 800; color: #fff; letter-spacing: 0.3px; }
+.cardDesc  { font-size: 0.75rem; color: rgba(255,255,255,0.4); line-height: 1.4; }
 
 .cardArrow {
   font-size: 0.7rem;
@@ -179,26 +126,38 @@
   position: relative;
   z-index: 1;
 }
+.card:hover .cardArrow { opacity: 1; transform: translateX(3px); }
 
-.card:hover .cardArrow {
-  opacity: 1;
-  transform: translateX(3px);
-}
-
-/* ── Skip link — subtle, like the splash fade ── */
+/* ── Skip ────────────────────────────────────────────────── */
 .skip {
   background: none;
   border: none;
-  color: rgba(255, 255, 255, 0.22);
+  color: rgba(255,255,255,0.22);
   font-size: 0.78rem;
   cursor: pointer;
   font-family: inherit;
-  padding: 0.3rem 0.8rem;
+  padding: 0.5rem 1rem;
   border-radius: 6px;
   letter-spacing: 0.3px;
   transition: color 0.2s;
+  min-height: 44px;
+}
+.skip:hover { color: rgba(255,255,255,0.55); }
+
+/* ── Mobile ──────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .inner    { gap: 1.1rem; }
+  .logoMark { font-size: 2.8rem; }
+  .headline { font-size: 1.2rem; letter-spacing: 1px; }
+  .sub      { font-size: 0.75rem; }
+  .card     { padding: 0.85rem 1rem; gap: 0.75rem; min-height: 58px; }
+  .cardIcon { font-size: 1.7rem; }
+  .cardTitle{ font-size: 0.92rem; }
+  .cardDesc { font-size: 0.7rem; }
 }
 
-.skip:hover {
-  color: rgba(255, 255, 255, 0.55);
+@media (max-width: 360px) {
+  .headline { font-size: 1.05rem; }
+  .card     { padding: 0.75rem 0.85rem; }
+  .cardIcon { font-size: 1.5rem; }
 }
